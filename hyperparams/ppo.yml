@@ -1,6 +1,10 @@
 donkey-waveshare-v0:
-  policy: "CnnPolicy"
-  policy_kwargs: "dict(activation_fn=nn.ReLU, net_arch=[dict(pi=[256, 256], vf=[256, 256])])"
+  policy: "MlpPolicy"
+  policy_kwargs: "dict(log_std_init=-2,
+    ortho_init=False,
+    activation_fn=nn.ReLU,
+    net_arch=dict(pi=[256, 256], vf=[256, 256])
+    )"
 
   # General RL training hyperparameters
   n_timesteps: !!float 2e6
@@ -20,6 +24,13 @@ donkey-waveshare-v0:
   sde_sample_freq: 64
   target_kl: 0.01 # Only used when using Generalized Advantage Estimation (GAE). It's a factor for early stopping in policy updates (0.01 is a good default)
   # Callbacks
+  normalize: "{'norm_obs': True, 'norm_reward': False}"
+  env_wrapper:
+    - gym.wrappers.time_limit.TimeLimit:
+        max_episode_steps: 10000
+    - ae.wrapper.AutoencoderWrapper
+    - rl_zoo3.wrappers.HistoryWrapper:
+        horizon: 2
   callback:
     - rl_zoo3.callbacks.LapTimeCallback
 

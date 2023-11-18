@@ -13,16 +13,48 @@ donkey-waveshare-v0: &defaults # Normalize AE (+ the rest)
         gradient_steps: 200
     - rl_zoo3.callbacks.LapTimeCallback
 
-  n_timesteps: !!float 2e6
+  n_timesteps: !!float 2e7
   policy: "MlpPolicy"
   learning_rate: !!float 7.3e-4
   buffer_size: 200000
-  batch_size: 256p
+  batch_size: 128
   ent_coef: "auto"
   gamma: 0.99
   tau: 0.02
   train_freq: 200
-  gradient_steps: 256
+  gradient_steps: 128
+  learning_starts: 0
+  use_sde_at_warmup: True
+  use_sde: True
+  sde_sample_freq: 16
+  policy_kwargs: "dict(log_std_init=-3, net_arch=[256, 256], n_critics=2, use_expln=True)"
+
+
+## Custom envs
+donkey-mountain-track-v0: # Normalize AE (+ the rest)
+  normalize: "{'norm_obs': True, 'norm_reward': False}"
+  env_wrapper:
+    - gym.wrappers.time_limit.TimeLimit:
+        max_episode_steps: 10000
+    - ae.wrapper.AutoencoderWrapper
+    # ae_path: "G:\\UTS\\3rdSem\\43008\\racing\\donkey\\aae-train-donkeycar\\logs\\ae-32_1699356562_best.pkl"
+    - rl_zoo3.wrappers.HistoryWrapper:
+        horizon: 2
+  callback:
+    - rl_zoo3.callbacks.ParallelTrainCallback:
+        gradient_steps: 200
+    - rl_zoo3.callbacks.LapTimeCallback
+
+  n_timesteps: !!float 2e7
+  policy: "MlpPolicy"
+  learning_rate: !!float 7.3e-4
+  buffer_size: 200000
+  batch_size: 128
+  ent_coef: "auto"
+  gamma: 0.99
+  tau: 0.02
+  train_freq: 200
+  gradient_steps: 128
   learning_starts: 20000
   use_sde_at_warmup: True
   use_sde: True
